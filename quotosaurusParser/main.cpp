@@ -13,6 +13,7 @@ int main (int argc, char *argv[])
     inputFile.open(argv[1]);
     ostream& outputFile = (argc > 2) ? *(new ofstream(argv[2])) : cout;
     Parser parser(inputFile);
+    outputFile << parser.getJson();
     
     inputFile.close();
     if (&outputFile != &cout) delete (&outputFile);

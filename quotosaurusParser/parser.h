@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cctype>
 #include <set>
+#include <vector>
 #include "quoteObject.h"
 
 using namespace std;
@@ -14,20 +15,35 @@ class Parser
         {
             startQuote(input);
             cout << "added " << quoteCount << " quotes." <<endl;
-            for (string elem : authors)
-            {
-                cout << elem << endl;
-            }
         }
         ~Parser(){}
+        string getJson ()
+        {
+            stringstream data;
+            data << "{\"data\": [";
+            for (auto quote : quotes)
+            {
+                data << "{\"quote\": \"" << quote.getQuote() << "\",";
+                data << "\"author\": \"" << quote.getAuthor() << "\",";
+                data << "\"work\": \"" << quote.getWork() << "\"},";
+            }
+            string tempStr = data.str();
+            tempStr.pop_back();
+            tempStr = tempStr + "]}";
+            // data.str(tempStr);
+            data << "]}";
+            return tempStr;
+        }
     private:
         stringstream curBlock;
         int quoteCount;
         set<string> authors;
+        vector<QuoteObject> quotes;
         
         bool startQuote(ifstream &input)
         {
             char curChar;
+            QuoteObject curQuote;
             while (isspace(input.peek()))
             {
                 input.get(curChar);
@@ -37,11 +53,14 @@ class Parser
                 curBlock.str(string());
                 input.get(curChar);
                 curBlock << curChar;
+                stringstream quoteContents;
                 while (!quotationMark(input) && !input.eof())
                 {
                     input.get(curChar);
                     curBlock << curChar;
+                    quoteContents << curChar;
                 }
+                curQuote.setQuote(quoteContents.str());
                 input.get(curChar);
                 curBlock << curChar;
                 if (input.peek() == ' ')
@@ -62,15 +81,20 @@ class Parser
                         }
                         if (input.eof()) return error();
                         authors.insert(authorName.str());
+                        curQuote.setAuthor(authorName.str());
+                        stringstream work;
                         while (!rightPrin(input) && !input.eof())
                         {
                             input.get(curChar);
                             curBlock << curChar;
+                            if (curChar != '(') work << curChar;
                         }
                         if (input.eof()) return error();
+                        curQuote.setWork(work.str());
                         input.get(curChar);
                         curBlock << curChar;
                         quoteCount++;
+                        quotes.push_back (curQuote);
                         if (input.eof()) return true;
                         return startQuote(input);
                     }

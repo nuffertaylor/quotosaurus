@@ -13,6 +13,13 @@ class QuoteObject
         string getQuote(){return quote;}
         string getAuthor(){return author;}
         string getWork(){return work;}
+        
+        string toString()
+        {
+            stringstream output;
+            output << "Quote: " << quote << endl << "Author: " << author << endl << "Work: " << work << endl;
+            return output.str();
+        }
     private:
         string quote;
         string author;
